@@ -7,8 +7,12 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Import all models to register them with SQLAlchemy
+from wintern.auth import models as auth_models  # noqa: F401
 from wintern.auth.router import router as auth_router
 from wintern.core.config import settings
+from wintern.execution import models as execution_models  # noqa: F401
+from wintern.winterns import models as winterns_models  # noqa: F401
 from wintern.winterns.router import router as winterns_router
 
 log = structlog.get_logger()
