@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     secret_key: str = "change-me-in-production"
     access_token_expire_minutes: int = 30
 
+    # Google OAuth
+    google_oauth_client_id: str = ""
+    google_oauth_client_secret: str = ""
+
     # OpenRouter
     openrouter_api_key: str = ""
     default_model: str = "anthropic/claude-sonnet-4-20250514"

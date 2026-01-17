@@ -2,32 +2,28 @@
 
 import uuid
 
-from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
+from fastapi_users_db_sqlalchemy import (
+    SQLAlchemyBaseOAuthAccountTableUUID,
+    SQLAlchemyBaseUserTableUUID,
+)
 from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyBaseAccessTokenTableUUID
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
 from wintern.core.database import Base, TimestampMixin
 
 
-class OAuthAccount(Base):
+class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
     """OAuth account model for storing OAuth provider connections."""
 
     __tablename__ = "oauth_accounts"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    oauth_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
-    access_token: Mapped[str] = mapped_column(String(1024), nullable=False)
-    expires_at: Mapped[int | None] = mapped_column(nullable=True)
-    refresh_token: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    account_id: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
-    account_email: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    @declared_attr
+    def user_id(cls) -> Mapped[uuid.UUID]:  # type: ignore[override]  # noqa: N805
+        return mapped_column(
+            UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        )
 
     # Relationship back to user
     user: Mapped["User"] = relationship(back_populates="oauth_accounts")
@@ -51,7 +47,7 @@ class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
     """Access token model for token-based authentication."""
 
     @declared_attr
-    def user_id(self) -> Mapped[uuid.UUID]:
+    def user_id(cls) -> Mapped[uuid.UUID]:  # type: ignore[override]  # noqa: N805
         return mapped_column(
             UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
         )
