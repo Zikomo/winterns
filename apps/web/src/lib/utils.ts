@@ -1,11 +1,12 @@
 import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 /**
- * Utility for merging class names
- * Note: Install clsx if using this: pnpm add clsx
+ * Utility for merging Tailwind class names
+ * Combines clsx for conditional classes with tailwind-merge for deduplication
  */
 export function cn(...inputs: ClassValue[]): string {
-  return clsx(inputs)
+  return twMerge(clsx(inputs))
 }
 
 /**
