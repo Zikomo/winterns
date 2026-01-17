@@ -1,0 +1,12 @@
+{
+  "name": "@winterns/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Winterns web dashboard",
+  "scripts": {
+    "dev": "echo 'Web dev server not yet configured'",
+    "build": "echo 'Web build not yet configured'",
+    "lint": "echo 'Web lint not yet configured'",
+    "test": "echo 'Web tests not yet configured'"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "winterns",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered web research agents that deliver personalized digests",
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "dev:web": "pnpm --filter @winterns/web dev",
+    "dev:api": "pnpm --filter @winterns/api dev",
+    "build": "pnpm -r run build",
+    "build:web": "pnpm --filter @winterns/web build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r run clean"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "research",
+    "web-scraping",
+    "pydantic-ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
