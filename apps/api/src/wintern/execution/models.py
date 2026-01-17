@@ -31,9 +31,7 @@ class WinternRun(TimestampMixin, Base):
 
     __tablename__ = "wintern_runs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     wintern_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("winterns.id", ondelete="CASCADE"), nullable=False
     )
@@ -64,9 +62,7 @@ class SeenContent(Base):
 
     __tablename__ = "seen_content"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     wintern_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("winterns.id", ondelete="CASCADE"), nullable=False
     )

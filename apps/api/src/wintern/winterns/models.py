@@ -39,9 +39,7 @@ class Wintern(TimestampMixin, Base):
 
     __tablename__ = "winterns"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
@@ -49,9 +47,7 @@ class Wintern(TimestampMixin, Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     context: Mapped[str] = mapped_column(Text, nullable=False)  # User's research context/prompt
     is_active: Mapped[bool] = mapped_column(default=True)
-    cron_schedule: Mapped[str | None] = mapped_column(
-        String(100), nullable=True
-    )  # Cron expression
+    cron_schedule: Mapped[str | None] = mapped_column(String(100), nullable=True)  # Cron expression
     next_run_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
     # Relationships
@@ -76,9 +72,7 @@ class SourceConfig(TimestampMixin, Base):
 
     __tablename__ = "source_configs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     wintern_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("winterns.id", ondelete="CASCADE"), nullable=False
     )
@@ -97,9 +91,7 @@ class DeliveryConfig(TimestampMixin, Base):
 
     __tablename__ = "delivery_configs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     wintern_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("winterns.id", ondelete="CASCADE"), nullable=False
     )

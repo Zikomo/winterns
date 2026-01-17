@@ -77,9 +77,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
             email=user.email,
         )
 
-    async def on_after_request_verify(
-        self, user: User, token: str, request: Request | None = None
-    ):
+    async def on_after_request_verify(self, user: User, token: str, request: Request | None = None):
         """Called after a user requests email verification."""
         log.info(
             "Verification requested",
