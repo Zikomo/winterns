@@ -16,9 +16,9 @@ updates:
       - dependencies
       - python
 
-  # Node dependencies for Web
+  # Node dependencies (pnpm monorepo - must point to root for lockfile)
   - package-ecosystem: npm
-    directory: /apps/web
+    directory: /
     schedule:
       interval: weekly
       day: monday
