@@ -7,8 +7,8 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, ForeignKey, Index, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Enum, ForeignKey, Index, String, Text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from wintern.core.database import Base, TimestampMixin
@@ -78,7 +78,7 @@ class SourceConfig(TimestampMixin, Base):
     )
     source_type: Mapped[SourceType] = mapped_column(Enum(SourceType), nullable=False)
     config: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, default=dict
+        JSON, nullable=False, default=dict
     )  # Source-specific config (e.g., subreddits, search queries)
     is_active: Mapped[bool] = mapped_column(default=True)
 
@@ -97,7 +97,7 @@ class DeliveryConfig(TimestampMixin, Base):
     )
     delivery_type: Mapped[DeliveryType] = mapped_column(Enum(DeliveryType), nullable=False)
     config: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, default=dict
+        JSON, nullable=False, default=dict
     )  # Channel-specific config (e.g., webhook URL, email address)
     is_active: Mapped[bool] = mapped_column(default=True)
 

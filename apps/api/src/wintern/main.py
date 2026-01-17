@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from wintern.auth.router import router as auth_router
 from wintern.core.config import settings
+from wintern.winterns.router import router as winterns_router
 
 log = structlog.get_logger()
 
@@ -38,6 +39,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(winterns_router)
 
 
 @app.get("/health")
