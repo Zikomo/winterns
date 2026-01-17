@@ -65,7 +65,7 @@ jobs:
         run: pytest --cov --cov-report=xml
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: apps/api/coverage.xml
           flags: api
@@ -102,7 +102,7 @@ jobs:
         run: pnpm test
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: apps/web/coverage/coverage-final.json
           flags: web
