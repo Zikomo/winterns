@@ -1,0 +1,12 @@
+{
+  "name": "@winterns/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Winterns FastAPI backend",
+  "scripts": {
+    "dev": "uv run fastapi dev src/wintern/main.py",
+    "build": "echo 'API build handled by Docker'",
+    "lint": "uv run ruff check .",
+    "test": "uv run pytest"
+  }
+}
