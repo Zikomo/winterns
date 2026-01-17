@@ -1,2 +1,5 @@
 export { HomePage } from './HomePage'
 export { HealthPage } from './HealthPage'
+export { LoginPage } from './LoginPage'
+export { RegisterPage } from './RegisterPage'
+export { AuthCallbackPage } from './AuthCallbackPage'
