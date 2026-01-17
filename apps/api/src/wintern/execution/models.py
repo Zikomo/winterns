@@ -7,8 +7,8 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, ForeignKey, Index, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Enum, ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from wintern.core.database import Base, TimestampMixin
@@ -45,7 +45,7 @@ class WinternRun(TimestampMixin, Base):
     # Store the generated digest and metadata
     digest_content: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict | None] = mapped_column(
-        "metadata", JSONB, nullable=True
+        "metadata", JSON, nullable=True
     )  # Source counts, etc.
 
     # Relationships

@@ -8,9 +8,13 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+# Import all models to register them with SQLAlchemy
+from wintern.auth import models as auth_models  # noqa: F401
 from wintern.auth.service import get_async_session
 from wintern.core.database import Base
+from wintern.execution import models as execution_models  # noqa: F401
 from wintern.main import app
+from wintern.winterns import models as winterns_models  # noqa: F401
 
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
