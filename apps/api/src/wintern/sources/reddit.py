@@ -149,10 +149,10 @@ async def search_reddit(
         if subreddits:
             # Search within specific subreddits
             subreddit_str = "+".join(subreddits)
-            subreddit = reddit.subreddit(subreddit_str)
+            subreddit = await reddit.subreddit(subreddit_str)
         else:
             # Search all of Reddit
-            subreddit = reddit.subreddit("all")
+            subreddit = await reddit.subreddit("all")
 
         async for submission in subreddit.search(
             query,
