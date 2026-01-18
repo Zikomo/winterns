@@ -269,12 +269,44 @@ class TestSeenContentDeduplication:
             ("https://example.com/article2", "reddit"),
             ("https://example.com/article3", "brave_search"),
         ]
-        records = await execution_service.record_seen_content_batch(
+        inserted_count = await execution_service.record_seen_content_batch(
             test_session, test_wintern.id, run.id, items
         )
 
-        assert len(records) == 3
+        assert inserted_count == 3
 
+        hashes = await execution_service.get_seen_hashes(test_session, test_wintern.id)
+        assert len(hashes) == 3
+
+    @pytest.mark.asyncio
+    async def test_record_seen_content_batch_handles_duplicates(
+        self, test_session: AsyncSession, test_wintern
+    ):
+        """Should handle duplicate content gracefully with ON CONFLICT DO NOTHING."""
+        run = await execution_service.create_run(test_session, test_wintern.id)
+
+        # Insert some content
+        items = [
+            ("https://example.com/article1", "brave_search"),
+            ("https://example.com/article2", "reddit"),
+        ]
+        inserted_count = await execution_service.record_seen_content_batch(
+            test_session, test_wintern.id, run.id, items
+        )
+        assert inserted_count == 2
+
+        # Try to insert duplicates - should not raise and should report fewer inserted
+        duplicate_items = [
+            ("https://example.com/article1", "brave_search"),  # duplicate
+            ("https://example.com/article3", "brave_search"),  # new
+        ]
+        inserted_count = await execution_service.record_seen_content_batch(
+            test_session, test_wintern.id, run.id, duplicate_items
+        )
+        # Only 1 new record should be inserted
+        assert inserted_count == 1
+
+        # Total should be 3 unique hashes
         hashes = await execution_service.get_seen_hashes(test_session, test_wintern.id)
         assert len(hashes) == 3
 

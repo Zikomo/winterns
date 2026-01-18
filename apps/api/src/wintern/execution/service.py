@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 
 from croniter import croniter
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -249,8 +250,11 @@ async def record_seen_content_batch(
     wintern_id: uuid.UUID,
     run_id: uuid.UUID,
     items: list[tuple[str, str]],
-) -> list[SeenContent]:
+) -> int:
     """Record multiple pieces of content as seen in a batch.
+
+    Uses ON CONFLICT DO NOTHING to handle duplicates gracefully,
+    which can occur with concurrent or manual+scheduled runs.
 
     Args:
         session: The database session.
@@ -259,24 +263,34 @@ async def record_seen_content_batch(
         items: List of (url, source_type) tuples.
 
     Returns:
-        The created SeenContent records.
+        The number of records inserted (excluding duplicates).
     """
+    if not items:
+        return 0
+
     now = datetime.now(UTC)
-    seen_records = []
-    for url, source_type in items:
-        content_hash = compute_content_hash(url)
-        seen = SeenContent(
-            wintern_id=wintern_id,
-            run_id=run_id,
-            content_hash=content_hash,
-            source_type=source_type,
-            source_url=url,
-            seen_at=now,
-        )
-        session.add(seen)
-        seen_records.append(seen)
-    await session.flush()
-    return seen_records
+    values = [
+        {
+            "wintern_id": wintern_id,
+            "run_id": run_id,
+            "content_hash": compute_content_hash(url),
+            "source_type": source_type,
+            "source_url": url,
+            "seen_at": now,
+        }
+        for url, source_type in items
+    ]
+
+    # Use PostgreSQL INSERT ... ON CONFLICT DO NOTHING
+    stmt = pg_insert(SeenContent).values(values)
+    stmt = stmt.on_conflict_do_nothing(
+        index_elements=["wintern_id", "content_hash"]
+    )
+    cursor_result = await session.execute(stmt)
+    # rowcount returns the number of rows affected (inserted)
+    # CursorResult has rowcount, but the async wrapper type doesn't expose it
+    rowcount: int = getattr(cursor_result, "rowcount", 0) or 0
+    return rowcount
 
 
 # -----------------------------------------------------------------------------
