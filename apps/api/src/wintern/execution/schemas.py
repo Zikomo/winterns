@@ -22,7 +22,7 @@ class WinternRunResponse(BaseModel):
     digest_content: str | None = Field(default=None, description="The generated digest content")
     metadata_: dict | None = Field(
         default=None,
-        alias="metadata",
+        serialization_alias="metadata",
         description="Additional run metadata (source counts, delivery results, etc.)",
     )
     created_at: datetime = Field(..., description="When the run record was created")
