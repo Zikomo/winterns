@@ -193,6 +193,8 @@ async def send_slack(
         raise SlackWebhookMissingError("Slack webhook URL is required")
 
     # Create client with rate limit retry handler
+    # Note: AsyncWebhookClient manages its own aiohttp.ClientSession internally -
+    # when no session is provided, it creates one per request and closes it in a finally block
     client = AsyncWebhookClient(url=webhook_url)
     rate_limit_handler = AsyncRateLimitErrorRetryHandler(max_retry_count=2)
     client.retry_handlers.append(rate_limit_handler)
