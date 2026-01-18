@@ -1,6 +1,47 @@
 import { describe, it, expect } from 'vitest'
 import { toSnakeCase, toCamelCase } from './api'
 
+describe('case transformers - non-plain objects', () => {
+  it('does not transform Date objects', () => {
+    const date = new Date('2024-01-01')
+    expect(toSnakeCase(date)).toBe(date)
+    expect(toCamelCase(date)).toBe(date)
+  })
+
+  it('does not transform URLSearchParams', () => {
+    const params = new URLSearchParams()
+    params.append('user_name', 'test')
+    expect(toSnakeCase(params)).toBe(params)
+    expect(toCamelCase(params)).toBe(params)
+  })
+
+  it('does not transform FormData', () => {
+    const formData = new FormData()
+    expect(toSnakeCase(formData)).toBe(formData)
+    expect(toCamelCase(formData)).toBe(formData)
+  })
+
+  it('does not transform Blob', () => {
+    const blob = new Blob(['test'], { type: 'text/plain' })
+    expect(toSnakeCase(blob)).toBe(blob)
+    expect(toCamelCase(blob)).toBe(blob)
+  })
+
+  it('does not transform ArrayBuffer', () => {
+    const buffer = new ArrayBuffer(8)
+    expect(toSnakeCase(buffer)).toBe(buffer)
+    expect(toCamelCase(buffer)).toBe(buffer)
+  })
+
+  it('preserves Date objects inside plain objects', () => {
+    const date = new Date('2024-01-01')
+    const input = { createdAt: date, userName: 'test' }
+    const result = toSnakeCase<{ created_at: Date; user_name: string }>(input)
+    expect(result.created_at).toBe(date)
+    expect(result.user_name).toBe('test')
+  })
+})
+
 describe('toSnakeCase', () => {
   it('converts simple camelCase to snake_case', () => {
     expect(toSnakeCase({ cronSchedule: '0 9 * * *' })).toEqual({ cron_schedule: '0 9 * * *' })
