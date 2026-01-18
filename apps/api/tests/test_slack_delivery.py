@@ -21,7 +21,8 @@ from wintern.delivery import (
 from wintern.delivery.slack import (
     MAX_ITEMS_PER_MESSAGE,
     _build_blocks,
-    _escape_mrkdwn,
+    _escape_mrkdwn_text,
+    _escape_mrkdwn_url,
     _format_item_block,
 )
 
@@ -166,18 +167,18 @@ class TestDeliveryResult:
 # -----------------------------------------------------------------------------
 
 
-class TestEscapeMrkdwn:
-    """Tests for _escape_mrkdwn function."""
+class TestEscapeMrkdwnText:
+    """Tests for _escape_mrkdwn_text function (display text escaping)."""
 
     def test_escape_pipe(self) -> None:
         """Test that pipe characters are escaped."""
-        result = _escape_mrkdwn("Hello | World")
+        result = _escape_mrkdwn_text("Hello | World")
         assert "|" not in result
         assert "\u2223" in result  # Unicode DIVIDES character
 
     def test_escape_angle_brackets(self) -> None:
         """Test that angle brackets are escaped."""
-        result = _escape_mrkdwn("<tag>content</tag>")
+        result = _escape_mrkdwn_text("<tag>content</tag>")
         assert "<" not in result
         assert ">" not in result
         assert "&lt;" in result
@@ -185,21 +186,57 @@ class TestEscapeMrkdwn:
 
     def test_escape_ampersand(self) -> None:
         """Test that ampersands are escaped."""
-        result = _escape_mrkdwn("A & B")
+        result = _escape_mrkdwn_text("A & B")
         assert "&amp;" in result
 
     def test_escape_order(self) -> None:
         """Test that ampersands are escaped before other entities."""
         # This ensures we don't double-escape &lt; to &amp;lt;
-        result = _escape_mrkdwn("A & B < C")
+        result = _escape_mrkdwn_text("A & B < C")
         assert "&amp;" in result
         assert "&lt;" in result
         assert "&amp;lt;" not in result
 
     def test_no_escape_needed(self) -> None:
         """Test that clean text passes through unchanged."""
-        result = _escape_mrkdwn("Hello World")
+        result = _escape_mrkdwn_text("Hello World")
         assert result == "Hello World"
+
+
+class TestEscapeMrkdwnUrl:
+    """Tests for _escape_mrkdwn_url function (URL escaping)."""
+
+    def test_escape_pipe_in_url(self) -> None:
+        """Test that pipe characters in URLs are URL-encoded."""
+        result = _escape_mrkdwn_url("https://example.com/path?a=1|2")
+        assert "|" not in result
+        assert "%7C" in result
+
+    def test_escape_greater_than_in_url(self) -> None:
+        """Test that > characters in URLs are URL-encoded."""
+        result = _escape_mrkdwn_url("https://example.com/path?redirect=>next")
+        assert ">" not in result
+        assert "%3E" in result
+
+    def test_escape_both_pipe_and_gt(self) -> None:
+        """Test escaping both pipe and > in the same URL."""
+        result = _escape_mrkdwn_url("https://example.com/?a|b>c")
+        assert "|" not in result
+        assert ">" not in result
+        assert "%7C" in result
+        assert "%3E" in result
+
+    def test_no_escape_needed(self) -> None:
+        """Test that clean URLs pass through unchanged."""
+        url = "https://example.com/article?id=123&category=tech"
+        result = _escape_mrkdwn_url(url)
+        assert result == url
+
+    def test_preserves_other_url_encoded_chars(self) -> None:
+        """Test that existing URL encoding is preserved."""
+        url = "https://example.com/search?q=hello%20world"
+        result = _escape_mrkdwn_url(url)
+        assert result == url
 
 
 class TestFormatItemBlock:
@@ -264,6 +301,23 @@ class TestFormatItemBlock:
         assert "&amp;" in text  # Escaped ampersand
         assert "&lt;" in text  # Escaped <
         assert "&gt;" in text  # Escaped >
+
+    def test_format_item_escapes_special_chars_in_url(self) -> None:
+        """Test that special characters in URLs are URL-encoded for mrkdwn."""
+        item = DeliveryItem(
+            url="https://example.com/article?filter=a|b&redirect=>next",
+            title="Test Article",
+            relevance_score=85,
+            reasoning="Test",
+        )
+        block = _format_item_block(item, 1)
+        text = block["text"]["text"]
+        # The URL should have pipe and > URL-encoded
+        assert "%7C" in text  # URL-encoded pipe
+        assert "%3E" in text  # URL-encoded >
+        # Original characters should not appear in URL portion of the link
+        # Note: the link format is <url|title>, so we check the escaped URL is there
+        assert "https://example.com/article?filter=a%7Cb&redirect=%3Enext" in text
 
 
 class TestBuildBlocks:

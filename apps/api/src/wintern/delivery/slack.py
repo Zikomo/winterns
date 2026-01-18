@@ -51,22 +51,39 @@ class SlackRateLimitError(SlackError):
         super().__init__(message)
 
 
-def _escape_mrkdwn(text: str) -> str:
-    """Escape special characters for Slack mrkdwn link text.
+def _escape_mrkdwn_text(text: str) -> str:
+    """Escape special characters for Slack mrkdwn link display text.
 
     Slack mrkdwn links use the format <url|text>, so we need to escape
-    characters that would break this syntax.
+    characters that would break this syntax in the display text portion.
 
     Args:
-        text: The text to escape.
+        text: The display text to escape.
 
     Returns:
-        Escaped text safe for use in mrkdwn links.
+        Escaped text safe for use in mrkdwn link display text.
     """
     # Escape & first (so we don't double-escape), then < > |
     # Use Unicode DIVIDES (U+2223) to replace pipe - looks similar but won't break mrkdwn
     result = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return result.replace("|", "\u2223")
+
+
+def _escape_mrkdwn_url(url: str) -> str:
+    """Escape special characters in URLs for Slack mrkdwn links.
+
+    Slack mrkdwn links use the format <url|text>. URLs containing | or >
+    can break the link syntax, so we need to URL-encode these characters.
+
+    Args:
+        url: The URL to escape.
+
+    Returns:
+        Escaped URL safe for use in mrkdwn links.
+    """
+    # URL-encode characters that would break mrkdwn link syntax
+    # | becomes %7C, > becomes %3E
+    return url.replace("|", "%7C").replace(">", "%3E")
 
 
 def _format_item_block(item: DeliveryItem, index: int) -> dict[str, Any]:
@@ -86,9 +103,10 @@ def _format_item_block(item: DeliveryItem, index: int) -> dict[str, Any]:
         score_emoji = "🟡"
     else:
         score_emoji = "🔴"
-    # Escape title for mrkdwn link syntax
-    safe_title = _escape_mrkdwn(item.title)
-    text_parts = [f"*{index}. <{item.url}|{safe_title}>* {score_emoji}"]
+    # Escape URL and title for mrkdwn link syntax
+    safe_url = _escape_mrkdwn_url(item.url)
+    safe_title = _escape_mrkdwn_text(item.title)
+    text_parts = [f"*{index}. <{safe_url}|{safe_title}>* {score_emoji}"]
     text_parts.append(f"_{item.reasoning}_")
 
     if item.key_excerpt:

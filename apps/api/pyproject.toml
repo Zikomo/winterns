@@ -29,6 +29,7 @@ dependencies = [
     "pydantic-ai>=0.0.39",
     # Scheduling
     "apscheduler>=3.10.4",
+    "croniter>=2.0.0",
     # Delivery channels
     "slack-sdk[optional]>=3.33.0",  # optional extra includes aiohttp for async
 ]
