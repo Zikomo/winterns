@@ -17,8 +17,9 @@ dependencies = [
     "alembic>=1.14.0",
     # HTTP client
     "httpx>=0.28.0",
-    # Data sources (install from main branch - aiosqlite constraint removed but not released yet)
-    "asyncpraw @ git+https://github.com/praw-dev/asyncpraw.git@main",
+    # Data sources (pinned to commit after aiosqlite constraint was removed - not released yet)
+    # See: https://github.com/praw-dev/asyncpraw/issues/290
+    "asyncpraw @ git+https://github.com/praw-dev/asyncpraw.git@9221cbef5d94fce9ecc92376cbab084f0082502d",
     # Auth
     "fastapi-users[sqlalchemy,oauth]>=14.0.0",
     "python-jose[cryptography]>=3.3.0",
