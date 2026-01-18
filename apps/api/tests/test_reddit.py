@@ -169,7 +169,7 @@ class TestSearchReddit:
         mock_subreddit.search = mock_search_generator
 
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(return_value=mock_subreddit)
+        mock_reddit.subreddit = AsyncMock(return_value=mock_subreddit)
         mock_reddit.close = AsyncMock()
 
         with (
@@ -198,7 +198,7 @@ class TestSearchReddit:
         mock_subreddit.search = mock_search_generator
 
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(return_value=mock_subreddit)
+        mock_reddit.subreddit = AsyncMock(return_value=mock_subreddit)
         mock_reddit.close = AsyncMock()
 
         with (
@@ -225,7 +225,7 @@ class TestSearchReddit:
         mock_subreddit.search = mock_search_generator
 
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(return_value=mock_subreddit)
+        mock_reddit.subreddit = AsyncMock(return_value=mock_subreddit)
         mock_reddit.close = AsyncMock()
 
         with (
@@ -267,7 +267,7 @@ class TestSearchReddit:
         mock_subreddit.search = mock_search_generator
 
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(return_value=mock_subreddit)
+        mock_reddit.subreddit = AsyncMock(return_value=mock_subreddit)
         mock_reddit.close = AsyncMock()
 
         with (
@@ -286,7 +286,7 @@ class TestSearchReddit:
     async def test_forbidden_error(self) -> None:
         """Test handling of forbidden errors."""
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(side_effect=Forbidden(MagicMock()))
+        mock_reddit.subreddit = AsyncMock(side_effect=Forbidden(MagicMock()))
         mock_reddit.close = AsyncMock()
 
         with (
@@ -303,7 +303,7 @@ class TestSearchReddit:
     async def test_not_found_error(self) -> None:
         """Test handling of not found errors."""
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(side_effect=NotFound(MagicMock()))
+        mock_reddit.subreddit = AsyncMock(side_effect=NotFound(MagicMock()))
         mock_reddit.close = AsyncMock()
 
         with (
@@ -320,7 +320,7 @@ class TestSearchReddit:
     async def test_response_error(self) -> None:
         """Test handling of response errors."""
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(side_effect=ResponseException(MagicMock()))
+        mock_reddit.subreddit = AsyncMock(side_effect=ResponseException(MagicMock()))
         mock_reddit.close = AsyncMock()
 
         with (
@@ -347,7 +347,7 @@ class TestSearchReddit:
         mock_subreddit.search = mock_search_generator
 
         mock_reddit = AsyncMock()
-        mock_reddit.subreddit = MagicMock(return_value=mock_subreddit)
+        mock_reddit.subreddit = AsyncMock(return_value=mock_subreddit)
         mock_reddit.close = AsyncMock()
 
         with (
