@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     # Data Sources
     brave_api_key: str = ""
+    brave_rate_limit_rps: float = 1.0  # Requests per second (free tier = 1)
     reddit_client_id: str = ""
     reddit_client_secret: str = ""
     reddit_user_agent: str = "wintern/0.1.0"
