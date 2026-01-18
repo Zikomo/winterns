@@ -92,6 +92,8 @@ describe('winternKeys', () => {
     expect(winternKeys.details()).toEqual(['winterns', 'detail'])
     expect(winternKeys.detail('123')).toEqual(['winterns', 'detail', '123'])
     expect(winternKeys.runs('123')).toEqual(['winterns', 'detail', '123', 'runs'])
+    expect(winternKeys.runList('123', { skip: 0 })).toEqual(['winterns', 'detail', '123', 'runs', { skip: 0 }])
+    expect(winternKeys.run('123', 'run-456')).toEqual(['winterns', 'detail', '123', 'runs', 'run-456'])
   })
 })
 

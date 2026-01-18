@@ -21,6 +21,8 @@ export const winternKeys = {
   runs: (winternId: string) => [...winternKeys.detail(winternId), 'runs'] as const,
   runList: (winternId: string, params: PaginationParams) =>
     [...winternKeys.runs(winternId), params] as const,
+  run: (winternId: string, runId: string) =>
+    [...winternKeys.runs(winternId), runId] as const,
 }
 
 // List Winterns
@@ -42,7 +44,7 @@ export function useWinterns(params: PaginationParams = {}) {
 // Get single Wintern
 export function useWintern(id: string | undefined) {
   return useQuery({
-    queryKey: winternKeys.detail(id!),
+    queryKey: id ? winternKeys.detail(id) : winternKeys.details(),
     queryFn: async () => {
       const { data } = await api.get<Wintern>(`/v1/winterns/${id}`)
       return data
@@ -121,7 +123,9 @@ export function useWinternRuns(
   options?: { refetchInterval?: number | false }
 ) {
   return useQuery({
-    queryKey: winternKeys.runList(winternId!, params),
+    queryKey: winternId
+      ? winternKeys.runList(winternId, params)
+      : [...winternKeys.all, 'runs'] as const,
     queryFn: async () => {
       const searchParams = new URLSearchParams()
       if (params.skip !== undefined) searchParams.set('skip', String(params.skip))
@@ -139,7 +143,9 @@ export function useWinternRuns(
 // Get single Run
 export function useWinternRun(winternId: string | undefined, runId: string | undefined) {
   return useQuery({
-    queryKey: [...winternKeys.runs(winternId!), runId] as const,
+    queryKey: winternId && runId
+      ? winternKeys.run(winternId, runId)
+      : [...winternKeys.all, 'run'] as const,
     queryFn: async () => {
       const { data } = await api.get<WinternRun>(`/v1/winterns/${winternId}/runs/${runId}`)
       return data
