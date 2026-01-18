@@ -17,8 +17,8 @@ dependencies = [
     "alembic>=1.14.0",
     # HTTP client
     "httpx>=0.28.0",
-    # Data sources
-    "asyncpraw>=7.8.0",
+    # Data sources (install from main branch - aiosqlite constraint removed but not released yet)
+    "asyncpraw @ git+https://github.com/praw-dev/asyncpraw.git@main",
     # Auth
     "fastapi-users[sqlalchemy,oauth]>=14.0.0",
     "python-jose[cryptography]>=3.3.0",
@@ -44,12 +44,11 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/wintern"]
-
-[tool.uv]
-# Override asyncpraw's outdated aiosqlite constraint
-override-dependencies = ["aiosqlite>=0.20.0"]
 
 [tool.ruff]
 line-length = 100

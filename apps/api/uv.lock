@@ -6,9 +6,6 @@ resolution-markers = [
     "python_full_version < '3.14'",
 ]
 
-[manifest]
-overrides = [{ name = "aiosqlite", specifier = ">=0.20.0" }]
-
 [[package]]
 name = "ag-ui-protocol"
 version = "0.1.10"
@@ -316,31 +313,28 @@ wheels = [
 
 [[package]]
 name = "asyncpraw"
-version = "7.8.1"
-source = { registry = "https://pypi.org/simple" }
+version = "7.8.2.dev0"
+source = { git = "https://github.com/praw-dev/asyncpraw.git?rev=main#9221cbef5d94fce9ecc92376cbab084f0082502d" }
 dependencies = [
     { name = "aiofiles" },
     { name = "aiohttp" },
-    { name = "aiosqlite" },
     { name = "asyncprawcore" },
+    { name = "coverage" },
+    { name = "defusedxml" },
     { name = "update-checker" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/be/df/f5dad426f02a6f0b3ad3c0b028ae2ecda80a05a90237c99b33583d1a1370/asyncpraw-7.8.1.tar.gz", hash = "sha256:6fc50e3976ae106ef6190dbcca3b1b4050de7da5644adc50851ae6487679206f", size = 158972, upload-time = "2024-12-21T19:48:20.712Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8d/45/65671411cfaf816e4ca60b3417e79b03c98edebbe6b157dc79063f8a469b/asyncpraw-7.8.1-py3-none-any.whl", hash = "sha256:8b960dd0ab404e876b8a4eb3752a3706048a9da8fb0503018b82437d973651ba", size = 196437, upload-time = "2024-12-21T19:48:17.682Z" },
 ]
 
 [[package]]
 name = "asyncprawcore"
-version = "2.4.0"
+version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1e/0a/45dfc8c3b91d74f646817db3e89baecbd963a8374e2a8a33f2eb83c7e398/asyncprawcore-2.4.0.tar.gz", hash = "sha256:3a3359e5cd1ebe61d544a09d4b5eca7b16edfd17de07081a8415fc794f7bb62e", size = 18072, upload-time = "2023-11-27T03:39:53.009Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cb/59/77c1a9287eed6124603d546e27485f323c9a45fd6c7deb9c3ed8417b8c02/asyncprawcore-3.0.2.tar.gz", hash = "sha256:660e471d59557e21143f4bcbdfcc0f82d0ac4f93732433f4324cca8d69d9d24e", size = 18829, upload-time = "2025-08-06T21:42:19.05Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/a0/a1f216c7ad7fd94482242eb92d6903c0ed5f3340436b952db2a42d2eddeb/asyncprawcore-2.4.0-py3-none-any.whl", hash = "sha256:3fe0f85d783ad0fd2a5d68d219b576bdbe04260ad7195c8a035d8724f57cfa45", size = 19741, upload-time = "2023-11-27T03:39:51.793Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/5f/c88f7b4b950aec57ce661acf6e540e91ee923369a9ef72f8aa704f41f77c/asyncprawcore-3.0.2-py3-none-any.whl", hash = "sha256:27094f541c7b1de7996f0b2ee804b52f631a71f799f26dd8302ae5ea44e8b4a1", size = 20414, upload-time = "2025-08-06T21:42:17.989Z" },
 ]
 
 [[package]]
@@ -791,6 +785,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/13/7b/663f3285c1ac0e5d0854bd9db2c87caa6fa3d1a063185e3394a6cdca9151/cyclopts-4.5.0.tar.gz", hash = "sha256:717ac4235548b58d500baf7e688aa4d024caf0ee68f61a012ffd5e29db3099f9", size = 161980, upload-time = "2026-01-16T02:07:16.171Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/12/a3/2e00fececc34a99ae3a5d5702a5dd29c5371e4ed016647301a2b9bcc1976/cyclopts-4.5.0-py3-none-any.whl", hash = "sha256:305b9aa90a9cd0916f0a450b43e50ad5df9c252680731a0719edfb9b20381bf5", size = 199772, upload-time = "2026-01-16T02:07:14.707Z" },
+]
+
+[[package]]
+name = "defusedxml"
+version = "0.7.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69", size = 75520, upload-time = "2021-03-08T10:59:26.269Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61", size = 25604, upload-time = "2021-03-08T10:59:24.45Z" },
 ]
 
 [[package]]
@@ -3694,7 +3697,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.14.0" },
     { name = "apscheduler", specifier = ">=3.10.4" },
     { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "asyncpraw", specifier = ">=7.8.0" },
+    { name = "asyncpraw", git = "https://github.com/praw-dev/asyncpraw.git?rev=main" },
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "fastapi-users", extras = ["sqlalchemy", "oauth"], specifier = ">=14.0.0" },
     { name = "httpx", specifier = ">=0.28.0" },
