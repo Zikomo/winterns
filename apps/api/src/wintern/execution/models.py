@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Enum, ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, JSON, Enum, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -38,8 +38,8 @@ class WinternRun(TimestampMixin, Base):
     status: Mapped[RunStatus] = mapped_column(
         Enum(RunStatus), nullable=False, default=RunStatus.PENDING
     )
-    started_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Store the generated digest and metadata
@@ -74,7 +74,7 @@ class SeenContent(Base):
     )  # SHA-256 hash of content URL/ID
     source_type: Mapped[str] = mapped_column(String(50), nullable=False)
     source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    seen_at: Mapped[datetime] = mapped_column(nullable=False)
+    seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     run: Mapped[WinternRun] = relationship(back_populates="seen_contents")

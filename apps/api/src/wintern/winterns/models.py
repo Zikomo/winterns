@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Enum, ForeignKey, Index, String, Text
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -48,7 +48,7 @@ class Wintern(TimestampMixin, Base):
     context: Mapped[str] = mapped_column(Text, nullable=False)  # User's research context/prompt
     is_active: Mapped[bool] = mapped_column(default=True)
     cron_schedule: Mapped[str | None] = mapped_column(String(100), nullable=True)  # Cron expression
-    next_run_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    next_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     source_configs: Mapped[list[SourceConfig]] = relationship(
