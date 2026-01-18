@@ -11,6 +11,16 @@ from wintern.sources.brave import (
     brave_search,
     search_brave,
 )
+from wintern.sources.reddit import (
+    RedditAPIError,
+    RedditAuthError,
+    RedditCredentialsMissingError,
+    RedditError,
+    RedditSource,
+    TimeFilter,
+    reddit_source,
+    search_reddit,
+)
 from wintern.sources.schemas import SearchResult
 
 __all__ = [
@@ -21,7 +31,15 @@ __all__ = [
     "BraveSearchSource",
     "DataSource",
     "FreshnessFilter",
+    "RedditAPIError",
+    "RedditAuthError",
+    "RedditCredentialsMissingError",
+    "RedditError",
+    "RedditSource",
     "SearchResult",
+    "TimeFilter",
     "brave_search",
+    "reddit_source",
     "search_brave",
+    "search_reddit",
 ]
