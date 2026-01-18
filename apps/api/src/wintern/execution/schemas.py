@@ -51,8 +51,11 @@ class WinternRunListResponse(BaseModel):
 
 
 class TriggerRunResponse(BaseModel):
-    """Response when triggering a manual run."""
+    """Response when triggering a manual run.
 
-    run_id: uuid.UUID = Field(..., description="ID of the created run")
-    status: RunStatus = Field(..., description="Initial status (usually PENDING)")
+    Note: The run record is created by the background task, not the API.
+    Use the list runs endpoint to find runs for a wintern.
+    """
+
+    wintern_id: uuid.UUID = Field(..., description="ID of the wintern being executed")
     message: str = Field(..., description="Human-readable message about the trigger")

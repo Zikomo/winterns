@@ -408,11 +408,15 @@ async def execute_wintern(
         await execution_service.fail_run(
             session, run, "No active sources configured", metadata=metadata
         )
+        # Advance to next scheduled time to avoid retry spam
+        await execution_service.update_next_run_at(session, wintern)
         raise
     except NoDeliveryConfiguredError:
         await execution_service.fail_run(
             session, run, "No active delivery channels configured", metadata=metadata
         )
+        # Advance to next scheduled time to avoid retry spam
+        await execution_service.update_next_run_at(session, wintern)
         raise
     except Exception as e:
         log.error(
@@ -424,4 +428,6 @@ async def execute_wintern(
         await execution_service.fail_run(
             session, run, str(e), metadata=metadata
         )
+        # Advance to next scheduled time to avoid retry spam
+        await execution_service.update_next_run_at(session, wintern)
         raise ExecutionError(f"Execution failed: {e}") from e
