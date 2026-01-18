@@ -225,13 +225,16 @@ async def execute_wintern(
 
         # Step 2: Search all sources for each query
         all_results: list[SearchResult] = []
+        sources_executed = 0  # Track how many sources actually ran
         for source_config in active_sources:
             try:
                 source = create_data_source(source_config)
+                source_had_success = False
                 for query in interpreted_context.search_queries:
                     try:
                         results = await source.search(query, count=10)
                         all_results.extend(results)
+                        source_had_success = True
                         log.debug(
                             "Search completed",
                             source=source.source_name,
@@ -247,16 +250,34 @@ async def execute_wintern(
                             query=query,
                             error=str(e),
                         )
+                if source_had_success:
+                    sources_executed += 1
             except UnsupportedSourceError as e:
                 metadata["source_errors"].append(str(e))
                 log.warning("Unsupported source type", error=str(e))
 
         metadata["total_searched"] = len(all_results)
+        metadata["sources_executed"] = sources_executed
         log.info(
             "Search phase complete",
             wintern_id=str(wintern_id),
             total_results=len(all_results),
+            sources_executed=sources_executed,
         )
+
+        # Fail if no sources executed successfully
+        if sources_executed == 0:
+            error_msg = "All sources failed or are unsupported"
+            log.error(
+                "No sources executed successfully",
+                wintern_id=str(wintern_id),
+                source_errors=metadata["source_errors"],
+            )
+            await execution_service.fail_run(
+                session, run, error_msg, metadata=metadata
+            )
+            await execution_service.update_next_run_at(session, wintern)
+            raise ExecutionError(error_msg)
 
         # Step 3: Deduplicate against SeenContent
         seen_hashes = await execution_service.get_seen_hashes(session, wintern_id)
@@ -386,7 +407,27 @@ async def execute_wintern(
                     error=str(e),
                 )
 
-        # Step 8: Complete run and update next_run_at
+        # Step 8: Check delivery success and complete/fail run
+        successful_deliveries = [d for d in metadata["deliveries"] if d["success"]]
+        if not successful_deliveries:
+            # All deliveries failed - mark run as failed
+            error_msg = "All delivery channels failed"
+            log.error(
+                "All deliveries failed",
+                wintern_id=str(wintern_id),
+                run_id=str(run_id),
+                delivery_count=len(metadata["deliveries"]),
+            )
+            await execution_service.fail_run(
+                session,
+                run,
+                error_msg,
+                metadata=metadata,
+            )
+            await execution_service.update_next_run_at(session, wintern)
+            raise ExecutionError(error_msg)
+
+        # At least one delivery succeeded - complete the run
         await execution_service.complete_run(
             session,
             run,
