@@ -108,24 +108,18 @@ async def trigger_run(
             detail="No active delivery channels configured for this wintern",
         )
 
-    # Create initial run record
-    run = await execution_service.create_run(session, wintern_id)
-    await session.flush()
-
-    # Schedule background execution
+    # Schedule background execution - run record will be created by execute_wintern
     background_tasks.add_task(run_wintern_background, wintern_id)
 
     log.info(
         "Manual run triggered",
         wintern_id=str(wintern_id),
-        run_id=str(run.id),
         user_id=str(user.id),
     )
 
     return TriggerRunResponse(
-        run_id=run.id,
-        status=run.status,
-        message=f"Run {run.id} has been queued for execution",
+        wintern_id=wintern_id,
+        message="Execution has been queued. Check the runs list for status.",
     )
 
 
