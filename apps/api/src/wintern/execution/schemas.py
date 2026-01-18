@@ -16,18 +16,10 @@ class WinternRunResponse(BaseModel):
     id: uuid.UUID = Field(..., description="Unique identifier for the run")
     wintern_id: uuid.UUID = Field(..., description="ID of the wintern that was executed")
     status: RunStatus = Field(..., description="Current status of the run")
-    started_at: datetime | None = Field(
-        default=None, description="When the run started"
-    )
-    completed_at: datetime | None = Field(
-        default=None, description="When the run completed"
-    )
-    error_message: str | None = Field(
-        default=None, description="Error message if the run failed"
-    )
-    digest_content: str | None = Field(
-        default=None, description="The generated digest content"
-    )
+    started_at: datetime | None = Field(default=None, description="When the run started")
+    completed_at: datetime | None = Field(default=None, description="When the run completed")
+    error_message: str | None = Field(default=None, description="Error message if the run failed")
+    digest_content: str | None = Field(default=None, description="The generated digest content")
     metadata_: dict | None = Field(
         default=None,
         alias="metadata",
@@ -42,9 +34,7 @@ class WinternRunResponse(BaseModel):
 class WinternRunListResponse(BaseModel):
     """Paginated list of wintern runs."""
 
-    items: list[WinternRunResponse] = Field(
-        ..., description="List of runs for this page"
-    )
+    items: list[WinternRunResponse] = Field(..., description="List of runs for this page")
     total: int = Field(..., ge=0, description="Total number of runs")
     skip: int = Field(..., ge=0, description="Number of items skipped")
     limit: int = Field(..., ge=1, description="Maximum items per page")

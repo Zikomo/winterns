@@ -316,9 +316,7 @@ class TestGetRunEndpoint:
         fake_wintern_id = str(uuid.uuid4())
         fake_run_id = str(uuid.uuid4())
 
-        response = await client.get(
-            f"/api/v1/winterns/{fake_wintern_id}/runs/{fake_run_id}"
-        )
+        response = await client.get(f"/api/v1/winterns/{fake_wintern_id}/runs/{fake_run_id}")
 
         assert response.status_code == 401
 

@@ -222,9 +222,7 @@ class TestRunQueries:
     @pytest.mark.asyncio
     async def test_list_runs_for_wintern_empty(self, test_session: AsyncSession, test_wintern):
         """Should return empty list when no runs exist."""
-        runs, total = await execution_service.list_runs_for_wintern(
-            test_session, test_wintern.id
-        )
+        runs, total = await execution_service.list_runs_for_wintern(test_session, test_wintern.id)
 
         assert runs == []
         assert total == 0
@@ -241,9 +239,7 @@ class TestSeenContentDeduplication:
         assert hashes == set()
 
     @pytest.mark.asyncio
-    async def test_record_and_get_seen_content(
-        self, test_session: AsyncSession, test_wintern
-    ):
+    async def test_record_and_get_seen_content(self, test_session: AsyncSession, test_wintern):
         """Should record and retrieve seen content hashes."""
         run = await execution_service.create_run(test_session, test_wintern.id)
 
@@ -258,9 +254,7 @@ class TestSeenContentDeduplication:
         assert expected_hash in hashes
 
     @pytest.mark.asyncio
-    async def test_record_seen_content_batch(
-        self, test_session: AsyncSession, test_wintern
-    ):
+    async def test_record_seen_content_batch(self, test_session: AsyncSession, test_wintern):
         """Should record multiple pieces of content in a batch."""
         run = await execution_service.create_run(test_session, test_wintern.id)
 
@@ -334,9 +328,7 @@ class TestSchedulingOperations:
         assert due == []
 
     @pytest.mark.asyncio
-    async def test_get_due_winterns_returns_due(
-        self, test_session: AsyncSession, test_wintern
-    ):
+    async def test_get_due_winterns_returns_due(self, test_session: AsyncSession, test_wintern):
         """Should return winterns that are past their next_run_at."""
         # Set next_run_at to the past
         test_wintern.next_run_at = datetime.now(UTC) - timedelta(hours=1)
@@ -371,9 +363,7 @@ class TestSchedulingOperations:
         assert updated.next_run_at != old_next_run
 
     @pytest.mark.asyncio
-    async def test_update_next_run_at_no_schedule(
-        self, test_session: AsyncSession, test_user
-    ):
+    async def test_update_next_run_at_no_schedule(self, test_session: AsyncSession, test_user):
         """Should set next_run_at to None when no cron schedule."""
         wintern = Wintern(
             id=uuid.uuid4(),
@@ -410,13 +400,9 @@ class TestWinternLoading:
         assert len(wintern.delivery_configs) > 0
 
     @pytest.mark.asyncio
-    async def test_get_wintern_for_execution_not_found(
-        self, test_session: AsyncSession
-    ):
+    async def test_get_wintern_for_execution_not_found(self, test_session: AsyncSession):
         """Should return None for non-existent wintern."""
-        wintern = await execution_service.get_wintern_for_execution(
-            test_session, uuid.uuid4()
-        )
+        wintern = await execution_service.get_wintern_for_execution(test_session, uuid.uuid4())
 
         assert wintern is None
 

@@ -273,9 +273,7 @@ async def execute_wintern(
                 wintern_id=str(wintern_id),
                 source_errors=metadata["source_errors"],
             )
-            await execution_service.fail_run(
-                session, run, error_msg, metadata=metadata
-            )
+            await execution_service.fail_run(session, run, error_msg, metadata=metadata)
             await execution_service.update_next_run_at(session, wintern)
             raise ExecutionError(error_msg)
 
@@ -377,11 +375,13 @@ async def execute_wintern(
             try:
                 channel = create_delivery_channel(delivery_config)
                 result = await channel.deliver(payload)
-                metadata["deliveries"].append({
-                    "channel": result.channel,
-                    "success": result.success,
-                    "error": result.error_message,
-                })
+                metadata["deliveries"].append(
+                    {
+                        "channel": result.channel,
+                        "success": result.success,
+                        "error": result.error_message,
+                    }
+                )
                 log.info(
                     "Delivery complete",
                     channel=result.channel,
@@ -389,18 +389,22 @@ async def execute_wintern(
                     error=result.error_message,
                 )
             except UnsupportedDeliveryError as e:
-                metadata["deliveries"].append({
-                    "channel": delivery_config.delivery_type.value,
-                    "success": False,
-                    "error": str(e),
-                })
+                metadata["deliveries"].append(
+                    {
+                        "channel": delivery_config.delivery_type.value,
+                        "success": False,
+                        "error": str(e),
+                    }
+                )
                 log.warning("Unsupported delivery type", error=str(e))
             except Exception as e:
-                metadata["deliveries"].append({
-                    "channel": delivery_config.delivery_type.value,
-                    "success": False,
-                    "error": str(e),
-                })
+                metadata["deliveries"].append(
+                    {
+                        "channel": delivery_config.delivery_type.value,
+                        "success": False,
+                        "error": str(e),
+                    }
+                )
                 log.error(
                     "Delivery failed",
                     channel=delivery_config.delivery_type.value,
@@ -466,9 +470,7 @@ async def execute_wintern(
             run_id=str(run_id),
             error=str(e),
         )
-        await execution_service.fail_run(
-            session, run, str(e), metadata=metadata
-        )
+        await execution_service.fail_run(session, run, str(e), metadata=metadata)
         # Advance to next scheduled time to avoid retry spam
         await execution_service.update_next_run_at(session, wintern)
         raise ExecutionError(f"Execution failed: {e}") from e
