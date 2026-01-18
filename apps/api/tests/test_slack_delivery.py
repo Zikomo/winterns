@@ -18,7 +18,12 @@ from wintern.delivery import (
     send_slack,
     slack_delivery,
 )
-from wintern.delivery.slack import MAX_ITEMS_PER_MESSAGE, _build_blocks, _format_item_block
+from wintern.delivery.slack import (
+    MAX_ITEMS_PER_MESSAGE,
+    _build_blocks,
+    _escape_mrkdwn,
+    _format_item_block,
+)
 
 # -----------------------------------------------------------------------------
 # Fixtures
@@ -161,6 +166,42 @@ class TestDeliveryResult:
 # -----------------------------------------------------------------------------
 
 
+class TestEscapeMrkdwn:
+    """Tests for _escape_mrkdwn function."""
+
+    def test_escape_pipe(self) -> None:
+        """Test that pipe characters are escaped."""
+        result = _escape_mrkdwn("Hello | World")
+        assert "|" not in result
+        assert "\u2223" in result  # Unicode DIVIDES character
+
+    def test_escape_angle_brackets(self) -> None:
+        """Test that angle brackets are escaped."""
+        result = _escape_mrkdwn("<tag>content</tag>")
+        assert "<" not in result
+        assert ">" not in result
+        assert "&lt;" in result
+        assert "&gt;" in result
+
+    def test_escape_ampersand(self) -> None:
+        """Test that ampersands are escaped."""
+        result = _escape_mrkdwn("A & B")
+        assert "&amp;" in result
+
+    def test_escape_order(self) -> None:
+        """Test that ampersands are escaped before other entities."""
+        # This ensures we don't double-escape &lt; to &amp;lt;
+        result = _escape_mrkdwn("A & B < C")
+        assert "&amp;" in result
+        assert "&lt;" in result
+        assert "&amp;lt;" not in result
+
+    def test_no_escape_needed(self) -> None:
+        """Test that clean text passes through unchanged."""
+        result = _escape_mrkdwn("Hello World")
+        assert result == "Hello World"
+
+
 class TestFormatItemBlock:
     """Tests for _format_item_block function."""
 
@@ -207,6 +248,22 @@ class TestFormatItemBlock:
         block = _format_item_block(item, 1)
         # Should be truncated to 200 chars + "..."
         assert "..." in block["text"]["text"]
+
+    def test_format_item_escapes_special_chars_in_title(self) -> None:
+        """Test that special characters in title are escaped for mrkdwn."""
+        item = DeliveryItem(
+            url="https://example.com",
+            title="Title with | pipe & <brackets>",
+            relevance_score=85,
+            reasoning="Test",
+        )
+        block = _format_item_block(item, 1)
+        text = block["text"]["text"]
+        # The original title had a pipe - check it was escaped to unicode DIVIDES
+        assert "\u2223" in text  # Escaped pipe (unicode DIVIDES)
+        assert "&amp;" in text  # Escaped ampersand
+        assert "&lt;" in text  # Escaped <
+        assert "&gt;" in text  # Escaped >
 
 
 class TestBuildBlocks:
@@ -343,6 +400,24 @@ class TestSendSlack:
                 )
             assert exc_info.value.status_code == 400
 
+    @pytest.mark.asyncio
+    async def test_send_slack_network_error(
+        self,
+        sample_payload: DeliveryPayload,
+    ) -> None:
+        """Test that network errors are wrapped in SlackWebhookError."""
+        with patch("wintern.delivery.slack.AsyncWebhookClient") as mock_client_class:
+            mock_client = MagicMock()
+            mock_client.send = AsyncMock(side_effect=ConnectionError("Network unreachable"))
+            mock_client.retry_handlers = []
+            mock_client_class.return_value = mock_client
+
+            with pytest.raises(SlackWebhookError, match="Network or client error"):
+                await send_slack(
+                    "https://hooks.slack.com/services/xxx",
+                    sample_payload,
+                )
+
 
 # -----------------------------------------------------------------------------
 # SlackDelivery Class Tests
@@ -435,6 +510,22 @@ class TestSlackDelivery:
 
             # Verify the override URL was used
             mock_client_class.assert_called_with(url="https://hooks.slack.com/override")
+
+    @pytest.mark.asyncio
+    async def test_deliver_unexpected_error(
+        self,
+        sample_payload: DeliveryPayload,
+    ) -> None:
+        """Test that unexpected errors are caught and returned as failed result."""
+        with patch("wintern.delivery.slack.send_slack") as mock_send:
+            # Simulate an unexpected error that escapes send_slack
+            mock_send.side_effect = RuntimeError("Unexpected internal error")
+
+            delivery = SlackDelivery(webhook_url="https://hooks.slack.com/test")
+            result = await delivery.deliver(sample_payload)
+
+            assert result.success is False
+            assert "Unexpected error" in (result.error_message or "")
 
     @pytest.mark.asyncio
     async def test_health_check_configured(self) -> None:
