@@ -50,6 +50,26 @@ main (protected)
 - **Linear history required** - only squash or rebase merges allowed
 - **Keep PRs focused** - one issue per PR when possible
 
+### Important for AI Agents
+
+**NEVER push directly to `main`.** Always:
+1. Create a feature branch (`git checkout -b feature/...` or `git checkout -b fix/...`)
+2. Commit changes to the feature branch
+3. Push the feature branch to origin
+4. Create a pull request using `gh pr create`
+5. Wait for CI to pass and user approval before merging
+
+Even for small fixes, use a PR. This ensures code review and CI validation.
+
+### Commit Hygiene in PRs
+
+**Prefer one clean commit per PR.** When fixing mistakes, bugs, or CI failures in an active PR:
+- **Amend the existing commit** rather than adding new "fix" commits
+- Use `git commit --amend` followed by `git push --force`
+- This keeps the PR as a single logical change
+
+This is a preference, not a hard rule. Multiple commits are fine when they represent distinct logical changes. The goal is to avoid polluting git history with commits like "fix typo", "fix CI", "address review feedback" - these aren't meaningful to the development history.
+
 ## Project Structure
 
 ```
