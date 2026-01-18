@@ -149,10 +149,10 @@ async def search_reddit(
         if subreddits:
             # Search within specific subreddits
             subreddit_str = "+".join(subreddits)
-            subreddit = await reddit.subreddit(subreddit_str)
+            subreddit = reddit.subreddit(subreddit_str)
         else:
             # Search all of Reddit
-            subreddit = await reddit.subreddit("all")
+            subreddit = reddit.subreddit("all")
 
         async for submission in subreddit.search(
             query,
@@ -231,10 +231,9 @@ class RedditSource(DataSource):
         try:
             reddit = _create_reddit_client()
             try:
-                # Verify we can authenticate by fetching a subreddit
-                subreddit = await reddit.subreddit("python")
-                # Access a property to trigger the API call
-                _ = subreddit.display_name
+                # Verify credentials by making an authenticated API call
+                # user.me() returns None for app-only auth but validates the credentials
+                await reddit.user.me()
                 return True
             finally:
                 await reddit.close()
