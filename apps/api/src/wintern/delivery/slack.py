@@ -51,6 +51,24 @@ class SlackRateLimitError(SlackError):
         super().__init__(message)
 
 
+def _escape_mrkdwn(text: str) -> str:
+    """Escape special characters for Slack mrkdwn link text.
+
+    Slack mrkdwn links use the format <url|text>, so we need to escape
+    characters that would break this syntax.
+
+    Args:
+        text: The text to escape.
+
+    Returns:
+        Escaped text safe for use in mrkdwn links.
+    """
+    # Escape & first (so we don't double-escape), then < > |
+    # Use Unicode DIVIDES (U+2223) to replace pipe - looks similar but won't break mrkdwn
+    result = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return result.replace("|", "\u2223")
+
+
 def _format_item_block(item: DeliveryItem, index: int) -> dict[str, Any]:
     """Format a single item as a Slack Block Kit section.
 
@@ -68,7 +86,9 @@ def _format_item_block(item: DeliveryItem, index: int) -> dict[str, Any]:
         score_emoji = "🟡"
     else:
         score_emoji = "🔴"
-    text_parts = [f"*{index}. <{item.url}|{item.title}>* {score_emoji}"]
+    # Escape title for mrkdwn link syntax
+    safe_title = _escape_mrkdwn(item.title)
+    text_parts = [f"*{index}. <{item.url}|{safe_title}>* {score_emoji}"]
     text_parts.append(f"_{item.reasoning}_")
 
     if item.key_excerpt:
@@ -200,6 +220,13 @@ async def send_slack(
     except SlackApiError as e:
         logger.error(f"Slack API error: {e}")
         raise SlackWebhookError(str(e)) from e
+    except SlackError:
+        # Re-raise our own errors
+        raise
+    except Exception as e:
+        # Catch network errors (aiohttp.ClientError, etc.) and wrap them
+        logger.error(f"Slack delivery failed with unexpected error: {e}")
+        raise SlackWebhookError(f"Network or client error: {e}") from e
 
 
 class SlackDelivery(DeliveryChannel):
@@ -257,6 +284,14 @@ class SlackDelivery(DeliveryChannel):
                 success=False,
                 channel=self.channel_name,
                 error_message=str(e),
+            )
+        except Exception as e:
+            # Catch any unexpected errors to prevent crashes
+            logger.error(f"Slack delivery failed with unexpected error: {e}")
+            return DeliveryResult(
+                success=False,
+                channel=self.channel_name,
+                error_message=f"Unexpected error: {e}",
             )
 
     async def health_check(self) -> bool:
