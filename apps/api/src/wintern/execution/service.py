@@ -156,8 +156,8 @@ async def list_runs_for_wintern(
         A tuple of (runs list, total count).
     """
     # Get total count
-    count_stmt = select(func.count()).select_from(WinternRun).where(
-        WinternRun.wintern_id == wintern_id
+    count_stmt = (
+        select(func.count()).select_from(WinternRun).where(WinternRun.wintern_id == wintern_id)
     )
     total = await session.scalar(count_stmt) or 0
 
@@ -205,9 +205,7 @@ async def get_seen_hashes(
     Returns:
         A set of content hashes that have already been processed.
     """
-    stmt = select(SeenContent.content_hash).where(
-        SeenContent.wintern_id == wintern_id
-    )
+    stmt = select(SeenContent.content_hash).where(SeenContent.wintern_id == wintern_id)
     result = await session.execute(stmt)
     return set(result.scalars().all())
 
@@ -283,9 +281,7 @@ async def record_seen_content_batch(
 
     # Use PostgreSQL INSERT ... ON CONFLICT DO NOTHING
     stmt = pg_insert(SeenContent).values(values)
-    stmt = stmt.on_conflict_do_nothing(
-        index_elements=["wintern_id", "content_hash"]
-    )
+    stmt = stmt.on_conflict_do_nothing(index_elements=["wintern_id", "content_hash"])
     cursor_result = await session.execute(stmt)
     # rowcount returns the number of rows affected (inserted)
     # CursorResult has rowcount, but the async wrapper type doesn't expose it

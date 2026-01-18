@@ -202,9 +202,7 @@ class TestExecuteWintern:
         assert "not found" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
-    async def test_raises_error_for_no_sources(
-        self, test_session: AsyncSession, test_user
-    ):
+    async def test_raises_error_for_no_sources(self, test_session: AsyncSession, test_user):
         """Should raise NoSourcesConfiguredError when no active sources."""
         wintern = Wintern(
             id=uuid.uuid4(),
@@ -229,9 +227,7 @@ class TestExecuteWintern:
             await execute_wintern(test_session, wintern.id)
 
     @pytest.mark.asyncio
-    async def test_raises_error_for_no_delivery(
-        self, test_session: AsyncSession, test_user
-    ):
+    async def test_raises_error_for_no_delivery(self, test_session: AsyncSession, test_user):
         """Should raise NoDeliveryConfiguredError when no active delivery channels."""
         wintern = Wintern(
             id=uuid.uuid4(),
@@ -256,9 +252,7 @@ class TestExecuteWintern:
             await execute_wintern(test_session, wintern.id)
 
     @pytest.mark.asyncio
-    async def test_creates_run_record(
-        self, test_session: AsyncSession, test_wintern_full
-    ):
+    async def test_creates_run_record(self, test_session: AsyncSession, test_wintern_full):
         """Should create a WinternRun record even if execution fails later."""
         from wintern.execution.models import WinternRun
 
@@ -281,9 +275,7 @@ class TestExecuteWintern:
         assert run.error_message is not None
 
     @pytest.mark.asyncio
-    async def test_full_execution_flow_mocked(
-        self, test_session: AsyncSession, test_wintern_full
-    ):
+    async def test_full_execution_flow_mocked(self, test_session: AsyncSession, test_wintern_full):
         """Should complete full execution flow with mocked agents and sources."""
         # Mock interpreted context
         mock_interpreted = InterpretedContext(
@@ -359,12 +351,8 @@ class TestExecuteWintern:
                 "wintern.execution.executor.compose_digest",
                 return_value=mock_compose_result,
             ),
-            patch(
-                "wintern.execution.executor.create_data_source"
-            ) as mock_create_source,
-            patch(
-                "wintern.execution.executor.create_delivery_channel"
-            ) as mock_create_delivery,
+            patch("wintern.execution.executor.create_data_source") as mock_create_source,
+            patch("wintern.execution.executor.create_delivery_channel") as mock_create_delivery,
         ):
             # Setup source mock
             mock_source = AsyncMock()
