@@ -9,6 +9,10 @@ function snakeToCamel(str: string): string {
   return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
+function isPlainObject(obj: unknown): obj is Record<string, unknown> {
+  return Object.prototype.toString.call(obj) === '[object Object]'
+}
+
 function transformKeys<T>(obj: unknown, transformer: (key: string) => string): T {
   if (obj === null || obj === undefined) {
     return obj as T
@@ -18,7 +22,8 @@ function transformKeys<T>(obj: unknown, transformer: (key: string) => string): T
     return obj.map((item) => transformKeys(item, transformer)) as T
   }
 
-  if (typeof obj === 'object' && obj !== null) {
+  // Only transform plain objects - skip FormData, Blob, Date, URLSearchParams, etc.
+  if (isPlainObject(obj)) {
     const transformed: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(obj)) {
       transformed[transformer(key)] = transformKeys(value, transformer)
