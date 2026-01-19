@@ -32,6 +32,9 @@ async def test_list_winterns_empty(client: AsyncClient):
     assert data["total"] == 0
     assert data["skip"] == 0
     assert data["limit"] == 20
+    assert data["active_count"] == 0
+    assert data["paused_count"] == 0
+    assert data["scheduled_count"] == 0
 
 
 @pytest.mark.asyncio
@@ -188,6 +191,41 @@ async def test_update_wintern(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_update_wintern_preserves_next_run_at(client: AsyncClient):
+    """Test that updating unrelated fields doesn't affect next_run_at."""
+    token = await get_auth_token(client, "update-schedule@example.com")
+
+    # Create a scheduled wintern
+    create_response = await client.post(
+        "/api/v1/winterns",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Scheduled Wintern",
+            "context": "Test context",
+            "cron_schedule": "0 9 * * *",
+        },
+    )
+    assert create_response.status_code == 201
+    wintern_id = create_response.json()["id"]
+    original_next_run_at = create_response.json()["next_run_at"]
+    assert original_next_run_at is not None
+
+    # Update only name/description - should NOT affect next_run_at
+    response = await client.put(
+        f"/api/v1/winterns/{wintern_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Renamed Wintern",
+            "description": "Added description",
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Renamed Wintern"
+    assert data["next_run_at"] == original_next_run_at  # Unchanged
+
+
+@pytest.mark.asyncio
 async def test_delete_wintern(client: AsyncClient):
     """Test soft deleting a Wintern."""
     token = await get_auth_token(client, "delete@example.com")
@@ -255,6 +293,71 @@ async def test_list_winterns_pagination(client: AsyncClient):
     data = response.json()
     assert len(data["items"]) == 2
     assert data["skip"] == 2
+
+
+@pytest.mark.asyncio
+async def test_list_winterns_aggregate_counts(client: AsyncClient):
+    """Test that aggregate counts are returned correctly across all winterns."""
+    token = await get_auth_token(client, "counts@example.com")
+
+    # Create 2 active winterns with schedules (will have next_run_at set)
+    for i in range(2):
+        await client.post(
+            "/api/v1/winterns",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "name": f"Active Scheduled {i}",
+                "context": f"Context {i}",
+                "cron_schedule": "0 9 * * *",
+            },
+        )
+
+    # Create 1 active wintern without schedule
+    await client.post(
+        "/api/v1/winterns",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Active No Schedule",
+            "context": "No schedule context",
+        },
+    )
+
+    # Create 2 winterns with schedules and pause them (next_run_at should be cleared)
+    for i in range(2):
+        create_response = await client.post(
+            "/api/v1/winterns",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "name": f"To Pause {i}",
+                "context": f"Will be paused {i}",
+                "cron_schedule": "0 10 * * *",
+            },
+        )
+        wintern_id = create_response.json()["id"]
+        # Pause by setting is_active=False - should clear next_run_at
+        await client.put(
+            f"/api/v1/winterns/{wintern_id}",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"is_active": False},
+        )
+
+    # List winterns with small page size to test counts are across all, not just page
+    response = await client.get(
+        "/api/v1/winterns?limit=2",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify pagination returns only 2 items
+    assert len(data["items"]) == 2
+    assert data["total"] == 5
+
+    # Counts should reflect all 5 winterns
+    assert data["active_count"] == 3
+    assert data["paused_count"] == 2
+    # Only the 2 active scheduled winterns should be counted (paused ones have next_run_at cleared)
+    assert data["scheduled_count"] == 2
 
 
 @pytest.mark.asyncio

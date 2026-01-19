@@ -1,13 +1,24 @@
 """Business logic for Wintern CRUD operations."""
 
 import uuid
+from dataclasses import dataclass
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from wintern.execution.service import calculate_next_run_at
 from wintern.winterns.models import DeliveryConfig, SourceConfig, Wintern
 from wintern.winterns.schemas import WinternCreate, WinternUpdate
+
+
+@dataclass
+class WinternCounts:
+    """Aggregate counts for a user's winterns."""
+
+    active_count: int
+    paused_count: int
+    scheduled_count: int
 
 
 async def get_wintern_by_id(
@@ -51,18 +62,44 @@ async def list_winterns_for_user(
     return items, total
 
 
+async def get_wintern_counts(
+    session: AsyncSession,
+    user_id: uuid.UUID,
+) -> WinternCounts:
+    """Get aggregate counts for a user's winterns."""
+    result = await session.execute(
+        select(
+            func.count(case((Wintern.is_active == True, 1))).label("active_count"),  # noqa: E712
+            func.count(case((Wintern.is_active == False, 1))).label("paused_count"),  # noqa: E712
+            func.count(case((Wintern.next_run_at != None, 1))).label("scheduled_count"),  # noqa: E711
+        ).where(Wintern.user_id == user_id)
+    )
+    row = result.one()
+    return WinternCounts(
+        active_count=row.active_count,
+        paused_count=row.paused_count,
+        scheduled_count=row.scheduled_count,
+    )
+
+
 async def create_wintern(
     session: AsyncSession,
     user_id: uuid.UUID,
     data: WinternCreate,
 ) -> Wintern:
     """Create a new Wintern with its source and delivery configs."""
+    # Calculate next_run_at if cron_schedule is provided
+    next_run_at = None
+    if data.cron_schedule:
+        next_run_at = calculate_next_run_at(data.cron_schedule)
+
     wintern = Wintern(
         user_id=user_id,
         name=data.name,
         description=data.description,
         context=data.context,
         cron_schedule=data.cron_schedule,
+        next_run_at=next_run_at,
     )
     session.add(wintern)
     await session.flush()  # Get the wintern ID
@@ -102,8 +139,16 @@ async def update_wintern(
     """Update an existing Wintern."""
     update_data = data.model_dump(exclude_unset=True)
 
+    # Apply the updates
     for field, value in update_data.items():
         setattr(wintern, field, value)
+
+    # Only update next_run_at when is_active or cron_schedule changes
+    if "is_active" in update_data or "cron_schedule" in update_data:
+        if wintern.is_active and wintern.cron_schedule:
+            wintern.next_run_at = calculate_next_run_at(wintern.cron_schedule)
+        else:
+            wintern.next_run_at = None
 
     await session.commit()
     await session.refresh(wintern)
@@ -116,4 +161,5 @@ async def delete_wintern(
 ) -> None:
     """Soft delete a Wintern by setting is_active to False."""
     wintern.is_active = False
+    wintern.next_run_at = None
     await session.commit()

@@ -34,11 +34,15 @@ async def list_winterns(
     items, total = await wintern_service.list_winterns_for_user(
         session, user.id, skip=skip, limit=limit
     )
+    counts = await wintern_service.get_wintern_counts(session, user.id)
     return WinternListResponse(
         items=[WinternResponse.model_validate(item) for item in items],
         total=total,
         skip=skip,
         limit=limit,
+        active_count=counts.active_count,
+        paused_count=counts.paused_count,
+        scheduled_count=counts.scheduled_count,
     )
 
 
