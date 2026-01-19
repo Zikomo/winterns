@@ -125,3 +125,6 @@ class WinternListResponse(BaseModel):
     total: int
     skip: int
     limit: int
+    active_count: int
+    paused_count: int
+    scheduled_count: int
