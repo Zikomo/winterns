@@ -19,7 +19,7 @@ Perfect for staying on top of industry news, tracking competitors, monitoring to
 - **Frontend:** React, TypeScript, Vite, TailwindCSS
 - **Database:** PostgreSQL
 - **LLM:** OpenRouter (supports Claude, GPT-4, Llama, etc.)
-- **Infrastructure:** Docker, AWS (ECS Fargate, RDS)
+- **Infrastructure:** Docker
 
 ## Getting Started
 
@@ -41,19 +41,20 @@ cd winterns
 cp .env.example .env
 # Edit .env with your API keys
 
-# Start services
+# Start PostgreSQL
+cd infrastructure
 docker compose up -d
+cd ..
 
-# Install dependencies
-pnpm install
-
-# Run the API
+# Backend setup
 cd apps/api
 pip install -e ".[dev]"
+alembic upgrade head
 uvicorn wintern.main:app --reload
 
-# Run the frontend (separate terminal)
+# Frontend setup (separate terminal)
 cd apps/web
+pnpm install
 pnpm dev
 ```
 
