@@ -24,7 +24,7 @@ from wintern.winterns import service as wintern_service
 
 log = structlog.get_logger()
 
-router = APIRouter(prefix="/api/v1/winterns", tags=["execution"])
+router = APIRouter(prefix="/v1/winterns", tags=["execution"])
 
 AsyncSessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 CurrentUserDep = Annotated[User, Depends(current_user)]
@@ -82,7 +82,7 @@ async def trigger_run(
     This endpoint immediately creates a run record and schedules the
     actual execution in the background, returning 202 Accepted.
 
-    The run can be monitored using GET /api/v1/winterns/{id}/runs/{run_id}.
+    The run can be monitored using GET /v1/winterns/{id}/runs/{run_id}.
     """
     # Verify wintern exists and belongs to user
     wintern = await wintern_service.get_wintern_by_id(session, wintern_id, user.id)

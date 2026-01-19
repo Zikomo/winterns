@@ -17,7 +17,7 @@ from wintern.winterns.schemas import (
     WinternUpdate,
 )
 
-router = APIRouter(prefix="/api/v1/winterns", tags=["winterns"])
+router = APIRouter(prefix="/v1/winterns", tags=["winterns"])
 
 AsyncSessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 CurrentUserDep = Annotated[User, Depends(current_user)]
