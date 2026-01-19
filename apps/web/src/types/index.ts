@@ -84,6 +84,10 @@ export interface WinternListResponse {
   total: number
   skip: number
   limit: number
+  // Aggregate counts (requires backend support)
+  activeCount?: number
+  pausedCount?: number
+  scheduledCount?: number
 }
 
 // Wintern Runs

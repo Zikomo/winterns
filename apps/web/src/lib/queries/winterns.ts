@@ -112,6 +112,10 @@ export function useTriggerRun() {
     onSuccess: (_, winternId) => {
       // Invalidate runs list to show the new pending run
       queryClient.invalidateQueries({ queryKey: winternKeys.runs(winternId) })
+      // Invalidate wintern lists since nextRunAt may have changed
+      queryClient.invalidateQueries({ queryKey: winternKeys.lists() })
+      // Invalidate the specific wintern detail
+      queryClient.invalidateQueries({ queryKey: winternKeys.detail(winternId) })
     },
   })
 }
