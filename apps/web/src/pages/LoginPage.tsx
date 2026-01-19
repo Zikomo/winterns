@@ -11,8 +11,8 @@ interface LoginFormData {
 }
 
 interface TokenResponse {
-  access_token: string
-  token_type: string
+  accessToken: string
+  tokenType: string
 }
 
 interface LocationState {
@@ -61,7 +61,7 @@ export function LoginPage() {
         },
       })
 
-      await login(response.data.access_token)
+      await login(response.data.accessToken)
       navigate(from, { replace: true })
     } catch (err) {
       if (err instanceof Error && 'response' in err) {
