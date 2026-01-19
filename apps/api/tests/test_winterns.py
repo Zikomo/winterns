@@ -23,7 +23,7 @@ async def test_list_winterns_empty(client: AsyncClient):
     token = await get_auth_token(client, "list-empty@example.com")
 
     response = await client.get(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -43,7 +43,7 @@ async def test_create_wintern(client: AsyncClient):
     token = await get_auth_token(client, "create@example.com")
 
     response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "AI News Digest",
@@ -81,7 +81,7 @@ async def test_create_wintern_minimal(client: AsyncClient):
     token = await get_auth_token(client, "minimal@example.com")
 
     response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Simple Wintern",
@@ -102,7 +102,7 @@ async def test_get_wintern(client: AsyncClient):
 
     # Create a wintern first
     create_response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Test Wintern",
@@ -113,7 +113,7 @@ async def test_get_wintern(client: AsyncClient):
 
     # Get the wintern
     response = await client.get(
-        f"/api/v1/winterns/{wintern_id}",
+        f"/v1/winterns/{wintern_id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -128,7 +128,7 @@ async def test_get_wintern_not_found(client: AsyncClient):
     token = await get_auth_token(client, "notfound@example.com")
 
     response = await client.get(
-        "/api/v1/winterns/00000000-0000-0000-0000-000000000000",
+        "/v1/winterns/00000000-0000-0000-0000-000000000000",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -140,7 +140,7 @@ async def test_get_wintern_other_user(client: AsyncClient):
     # Create wintern as user 1
     token1 = await get_auth_token(client, "user1@example.com")
     create_response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token1}"},
         json={
             "name": "User 1 Wintern",
@@ -152,7 +152,7 @@ async def test_get_wintern_other_user(client: AsyncClient):
     # Try to access as user 2
     token2 = await get_auth_token(client, "user2@example.com")
     response = await client.get(
-        f"/api/v1/winterns/{wintern_id}",
+        f"/v1/winterns/{wintern_id}",
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert response.status_code == 404
@@ -165,7 +165,7 @@ async def test_update_wintern(client: AsyncClient):
 
     # Create a wintern
     create_response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Original Name",
@@ -176,7 +176,7 @@ async def test_update_wintern(client: AsyncClient):
 
     # Update the wintern
     response = await client.put(
-        f"/api/v1/winterns/{wintern_id}",
+        f"/v1/winterns/{wintern_id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Updated Name",
@@ -197,7 +197,7 @@ async def test_update_wintern_preserves_next_run_at(client: AsyncClient):
 
     # Create a scheduled wintern
     create_response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Scheduled Wintern",
@@ -212,7 +212,7 @@ async def test_update_wintern_preserves_next_run_at(client: AsyncClient):
 
     # Update only name/description - should NOT affect next_run_at
     response = await client.put(
-        f"/api/v1/winterns/{wintern_id}",
+        f"/v1/winterns/{wintern_id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Renamed Wintern",
@@ -232,7 +232,7 @@ async def test_delete_wintern(client: AsyncClient):
 
     # Create a wintern
     create_response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "To Delete",
@@ -243,14 +243,14 @@ async def test_delete_wintern(client: AsyncClient):
 
     # Delete the wintern
     response = await client.delete(
-        f"/api/v1/winterns/{wintern_id}",
+        f"/v1/winterns/{wintern_id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 204
 
     # Verify it's soft deleted (still accessible but is_active=False)
     get_response = await client.get(
-        f"/api/v1/winterns/{wintern_id}",
+        f"/v1/winterns/{wintern_id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert get_response.status_code == 200
@@ -265,7 +265,7 @@ async def test_list_winterns_pagination(client: AsyncClient):
     # Create 5 winterns
     for i in range(5):
         await client.post(
-            "/api/v1/winterns",
+            "/v1/winterns",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "name": f"Wintern {i}",
@@ -275,7 +275,7 @@ async def test_list_winterns_pagination(client: AsyncClient):
 
     # Get first page
     response = await client.get(
-        "/api/v1/winterns?skip=0&limit=2",
+        "/v1/winterns?skip=0&limit=2",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -287,7 +287,7 @@ async def test_list_winterns_pagination(client: AsyncClient):
 
     # Get second page
     response = await client.get(
-        "/api/v1/winterns?skip=2&limit=2",
+        "/v1/winterns?skip=2&limit=2",
         headers={"Authorization": f"Bearer {token}"},
     )
     data = response.json()
@@ -303,7 +303,7 @@ async def test_list_winterns_aggregate_counts(client: AsyncClient):
     # Create 2 active winterns with schedules (will have next_run_at set)
     for i in range(2):
         await client.post(
-            "/api/v1/winterns",
+            "/v1/winterns",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "name": f"Active Scheduled {i}",
@@ -314,7 +314,7 @@ async def test_list_winterns_aggregate_counts(client: AsyncClient):
 
     # Create 1 active wintern without schedule
     await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Active No Schedule",
@@ -325,7 +325,7 @@ async def test_list_winterns_aggregate_counts(client: AsyncClient):
     # Create 2 winterns with schedules and pause them (next_run_at should be cleared)
     for i in range(2):
         create_response = await client.post(
-            "/api/v1/winterns",
+            "/v1/winterns",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "name": f"To Pause {i}",
@@ -336,14 +336,14 @@ async def test_list_winterns_aggregate_counts(client: AsyncClient):
         wintern_id = create_response.json()["id"]
         # Pause by setting is_active=False - should clear next_run_at
         await client.put(
-            f"/api/v1/winterns/{wintern_id}",
+            f"/v1/winterns/{wintern_id}",
             headers={"Authorization": f"Bearer {token}"},
             json={"is_active": False},
         )
 
     # List winterns with small page size to test counts are across all, not just page
     response = await client.get(
-        "/api/v1/winterns?limit=2",
+        "/v1/winterns?limit=2",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -363,11 +363,11 @@ async def test_list_winterns_aggregate_counts(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_winterns_unauthorized(client: AsyncClient):
     """Test that unauthenticated requests are rejected."""
-    response = await client.get("/api/v1/winterns")
+    response = await client.get("/v1/winterns")
     assert response.status_code == 401
 
     response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         json={"name": "Test", "context": "Test"},
     )
     assert response.status_code == 401

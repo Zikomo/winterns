@@ -26,7 +26,7 @@ async def create_wintern_with_configs(
 ) -> dict:
     """Helper to create a wintern with source and delivery configs."""
     response = await client.post(
-        "/api/v1/winterns",
+        "/v1/winterns",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "name": name,
@@ -51,7 +51,7 @@ async def create_wintern_with_configs(
 
 
 class TestTriggerRunEndpoint:
-    """Tests for POST /api/v1/winterns/{id}/run endpoint."""
+    """Tests for POST /v1/winterns/{id}/run endpoint."""
 
     @pytest.mark.asyncio
     async def test_trigger_run_success(self, client: AsyncClient):
@@ -60,7 +60,7 @@ class TestTriggerRunEndpoint:
         wintern = await create_wintern_with_configs(client, token)
 
         response = await client.post(
-            f"/api/v1/winterns/{wintern['id']}/run",
+            f"/v1/winterns/{wintern['id']}/run",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -76,7 +76,7 @@ class TestTriggerRunEndpoint:
         fake_id = str(uuid.uuid4())
 
         response = await client.post(
-            f"/api/v1/winterns/{fake_id}/run",
+            f"/v1/winterns/{fake_id}/run",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -89,7 +89,7 @@ class TestTriggerRunEndpoint:
 
         # Create wintern without sources
         response = await client.post(
-            "/api/v1/winterns",
+            "/v1/winterns",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "name": "No Sources Wintern",
@@ -102,7 +102,7 @@ class TestTriggerRunEndpoint:
         wintern = response.json()
 
         response = await client.post(
-            f"/api/v1/winterns/{wintern['id']}/run",
+            f"/v1/winterns/{wintern['id']}/run",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -116,7 +116,7 @@ class TestTriggerRunEndpoint:
 
         # Create wintern without delivery configs
         response = await client.post(
-            "/api/v1/winterns",
+            "/v1/winterns",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "name": "No Delivery Wintern",
@@ -129,7 +129,7 @@ class TestTriggerRunEndpoint:
         wintern = response.json()
 
         response = await client.post(
-            f"/api/v1/winterns/{wintern['id']}/run",
+            f"/v1/winterns/{wintern['id']}/run",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -141,7 +141,7 @@ class TestTriggerRunEndpoint:
         """Should return 401 for unauthenticated request."""
         fake_id = str(uuid.uuid4())
 
-        response = await client.post(f"/api/v1/winterns/{fake_id}/run")
+        response = await client.post(f"/v1/winterns/{fake_id}/run")
 
         assert response.status_code == 401
 
@@ -155,7 +155,7 @@ class TestTriggerRunEndpoint:
         # Try to trigger as user 2
         token2 = await get_auth_token(client, "trigger-user2@example.com")
         response = await client.post(
-            f"/api/v1/winterns/{wintern['id']}/run",
+            f"/v1/winterns/{wintern['id']}/run",
             headers={"Authorization": f"Bearer {token2}"},
         )
 
@@ -163,7 +163,7 @@ class TestTriggerRunEndpoint:
 
 
 class TestListRunsEndpoint:
-    """Tests for GET /api/v1/winterns/{id}/runs endpoint."""
+    """Tests for GET /v1/winterns/{id}/runs endpoint."""
 
     @pytest.mark.asyncio
     async def test_list_runs_empty(self, client: AsyncClient):
@@ -172,7 +172,7 @@ class TestListRunsEndpoint:
         wintern = await create_wintern_with_configs(client, token)
 
         response = await client.get(
-            f"/api/v1/winterns/{wintern['id']}/runs",
+            f"/v1/winterns/{wintern['id']}/runs",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -189,7 +189,7 @@ class TestListRunsEndpoint:
 
         # List runs (empty is fine, we're testing structure)
         response = await client.get(
-            f"/api/v1/winterns/{wintern['id']}/runs",
+            f"/v1/winterns/{wintern['id']}/runs",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -209,7 +209,7 @@ class TestListRunsEndpoint:
 
         # Get with specific pagination params
         response = await client.get(
-            f"/api/v1/winterns/{wintern['id']}/runs?skip=5&limit=10",
+            f"/v1/winterns/{wintern['id']}/runs?skip=5&limit=10",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -225,7 +225,7 @@ class TestListRunsEndpoint:
         fake_id = str(uuid.uuid4())
 
         response = await client.get(
-            f"/api/v1/winterns/{fake_id}/runs",
+            f"/v1/winterns/{fake_id}/runs",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -236,13 +236,13 @@ class TestListRunsEndpoint:
         """Should return 401 for unauthenticated request."""
         fake_id = str(uuid.uuid4())
 
-        response = await client.get(f"/api/v1/winterns/{fake_id}/runs")
+        response = await client.get(f"/v1/winterns/{fake_id}/runs")
 
         assert response.status_code == 401
 
 
 class TestGetRunEndpoint:
-    """Tests for GET /api/v1/winterns/{id}/runs/{run_id} endpoint."""
+    """Tests for GET /v1/winterns/{id}/runs/{run_id} endpoint."""
 
     @pytest.mark.asyncio
     async def test_trigger_returns_correct_response_fields(self, client: AsyncClient):
@@ -252,7 +252,7 @@ class TestGetRunEndpoint:
 
         # Trigger a run - the trigger response includes wintern_id and message
         trigger_response = await client.post(
-            f"/api/v1/winterns/{wintern['id']}/run",
+            f"/v1/winterns/{wintern['id']}/run",
             headers={"Authorization": f"Bearer {token}"},
         )
         trigger_data = trigger_response.json()
@@ -271,7 +271,7 @@ class TestGetRunEndpoint:
         fake_run_id = str(uuid.uuid4())
 
         response = await client.get(
-            f"/api/v1/winterns/{wintern['id']}/runs/{fake_run_id}",
+            f"/v1/winterns/{wintern['id']}/runs/{fake_run_id}",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -285,7 +285,7 @@ class TestGetRunEndpoint:
         fake_run_id = str(uuid.uuid4())
 
         response = await client.get(
-            f"/api/v1/winterns/{fake_wintern_id}/runs/{fake_run_id}",
+            f"/v1/winterns/{fake_wintern_id}/runs/{fake_run_id}",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -304,7 +304,7 @@ class TestGetRunEndpoint:
 
         # Try to get a non-existent run
         response = await client.get(
-            f"/api/v1/winterns/{wintern['id']}/runs/{fake_run_id}",
+            f"/v1/winterns/{wintern['id']}/runs/{fake_run_id}",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -316,7 +316,7 @@ class TestGetRunEndpoint:
         fake_wintern_id = str(uuid.uuid4())
         fake_run_id = str(uuid.uuid4())
 
-        response = await client.get(f"/api/v1/winterns/{fake_wintern_id}/runs/{fake_run_id}")
+        response = await client.get(f"/v1/winterns/{fake_wintern_id}/runs/{fake_run_id}")
 
         assert response.status_code == 401
 
@@ -331,7 +331,7 @@ class TestRunResponseSchema:
         wintern = await create_wintern_with_configs(client, token)
 
         response = await client.post(
-            f"/api/v1/winterns/{wintern['id']}/run",
+            f"/v1/winterns/{wintern['id']}/run",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -354,7 +354,7 @@ class TestRunResponseSchema:
         wintern = await create_wintern_with_configs(client, token)
 
         response = await client.get(
-            f"/api/v1/winterns/{wintern['id']}/runs",
+            f"/v1/winterns/{wintern['id']}/runs",
             headers={"Authorization": f"Bearer {token}"},
         )
 
